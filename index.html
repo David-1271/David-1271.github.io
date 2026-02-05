@@ -5,51 +5,416 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>David's Portfolio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #faf8f3;
+        height: 100vh;
+        width: 100vw;
+      }
+      
+      #maze-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+      
+      #maze-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      
+      .content-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+      }
+      
+      .card {
+        background-color: rgba(255, 253, 248, 0.97);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(139, 115, 85, 0.15);
+        border-radius: 15px;
+        border: 2px solid #e8dcc4;
+        pointer-events: auto;
+      }
+      
+      .card-body {
+        padding: 2rem;
+      }
+      
+      .nav-link {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-align: center;
+        color: #5a4a3a;
+      }
+      
+      .nav-link:hover {
+        background-color: rgba(232, 220, 196, 0.4);
+        transform: translateX(5px);
+        color: #3a2a1a;
+      }
+      
+      h1 {
+        color: #5a4a3a;
+        font-weight: 600;
+      }
+    </style>
   </head>
   <body>
-    <!-- Bootstrap Javascript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    
-    <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-        <div class="card" style="width: 400px; max-width: 90%;">
-            <div class="card-body">
-                <h1 class="text-center mb-4">Welcome</h1>
-                <ul class="nav flex-column">
-                    <li class="nav-item" align="center">
-                        <a class="nav-link" href="projects.html">Projects</a>
-                    </li>
-                    <li class="nav-item" align="center">
-                        <a class="nav-link" href="education.html">Education</a>
-                    </li>
-                    <!-- To be filled
-                     <li class="nav-item" align="center">
-                        <a class="nav-link" href="#">Experience</a>
-                    </li>
-                    -->
-                    <li class="nav-item" align="center">
-                        <a class="nav-link" href="contact.html">Contact Me</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <!-- Maze Canvas Background -->
+    <div id="maze-container">
+      <canvas id="maze-canvas"></canvas>
     </div>
 
-
-
-
-
-    <div class="container">
-      <div class="blurb">
-        <h1>Hi there, I'm David!</h1>
-        <p>Who am I?</p>
+    <!-- Content Overlay -->
+    <div class="content-overlay">
+      <div class="card" style="width: 450px; max-width: 90%;">
+        <div class="card-body">
+          <h1 class="text-center mb-4">Welcome</h1>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="projects.html">Projects</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="education.html">Education</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="contact.html">Contact Me</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-    <footer>
-      <ul>
-ef="contact.html">Contact Information</a></li>
-vid-1271">github.com/David-1271</a>
-        </li>
-      </ul>
-    </footer>
+
+    <!-- Bootstrap Javascript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <script>
+      // Maze and Dijkstra's Algorithm Implementation with Animation
+      document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('maze-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas to full window size
+        function resizeCanvas() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // Maze dimensions (cells)
+        const cellSize = 20;
+        const cols = Math.floor(canvas.width / cellSize);
+        const rows = Math.floor(canvas.height / cellSize);
+        
+        // Initialize maze grid - all cells start as walls
+        const grid = [];
+        for (let y = 0; y < rows; y++) {
+          grid[y] = [];
+          for (let x = 0; x < cols; x++) {
+            grid[y][x] = { 
+              x: x, 
+              y: y, 
+              isWall: true,
+              distance: Infinity,
+              previous: null,
+              visited: false,
+              inQueue: false,
+              exploredTime: null
+            };
+          }
+        }
+        
+        // Disjoint Set (Union-Find) data structure for Kruskal's algorithm
+        class DisjointSet {
+          constructor(size) {
+            this.parent = new Array(size);
+            this.rank = new Array(size);
+            for (let i = 0; i < size; i++) {
+              this.parent[i] = i;
+              this.rank[i] = 0;
+            }
+          }
+          
+          find(i) {
+            if (this.parent[i] !== i) {
+              this.parent[i] = this.find(this.parent[i]);
+            }
+            return this.parent[i];
+          }
+          
+          union(i, j) {
+            const rootI = this.find(i);
+            const rootJ = this.find(j);
+            
+            if (rootI === rootJ) return;
+            
+            if (this.rank[rootI] < this.rank[rootJ]) {
+              this.parent[rootI] = rootJ;
+            } else if (this.rank[rootI] > this.rank[rootJ]) {
+              this.parent[rootJ] = rootI;
+            } else {
+              this.parent[rootJ] = rootI;
+              this.rank[rootI]++;
+            }
+          }
+        }
+
+        // Generate maze using Kruskal's algorithm
+        function generateMazeWithKruskal() {
+          for (let y = 1; y < rows; y += 2) {
+            for (let x = 1; x < cols; x += 2) {
+              if (y < rows && x < cols) {
+                grid[y][x].isWall = false;
+              }
+            }
+          }
+          
+          const edges = [];
+          
+          for (let y = 1; y < rows; y += 2) {
+            for (let x = 1; x < cols; x += 2) {
+              if (x + 2 < cols) {
+                edges.push({
+                  x1: x, y1: y, x2: x + 2, y2: y,
+                  wallX: x + 1, wallY: y
+                });
+              }
+              
+              if (y + 2 < rows) {
+                edges.push({
+                  x1: x, y1: y, x2: x, y2: y + 2,
+                  wallX: x, wallY: y + 1
+                });
+              }
+            }
+          }
+          
+          for (let i = edges.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [edges[i], edges[j]] = [edges[j], edges[i]];
+          }
+          
+          const dsu = new DisjointSet(rows * cols);
+          
+          for (const edge of edges) {
+            const idx1 = edge.y1 * cols + edge.x1;
+            const idx2 = edge.y2 * cols + edge.x2;
+            
+            const root1 = dsu.find(idx1);
+            const root2 = dsu.find(idx2);
+            
+            if (root1 !== root2) {
+              dsu.union(idx1, idx2);
+              
+              if (edge.y1 < rows && edge.x1 < cols) {
+                grid[edge.y1][edge.x1].isWall = false;
+              }
+              if (edge.y2 < rows && edge.x2 < cols) {
+                grid[edge.y2][edge.x2].isWall = false;
+              }
+              
+              if (edge.wallY < rows && edge.wallX < cols) {
+                grid[edge.wallY][edge.wallX].isWall = false;
+              }
+            }
+          }
+          
+          grid[1][1].isWall = false;
+          const endX = (cols % 2 === 0) ? cols - 2 : cols - 1;
+          const endY = (rows % 2 === 0) ? rows - 2 : rows - 1;
+          grid[endY][endX].isWall = false;
+        }
+        
+        generateMazeWithKruskal();
+        
+        let exploredCells = [];
+        let finalPath = [];
+        let animationFrame = 0;
+        
+        // Draw the maze with animation
+        function drawMaze() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+              const cell = grid[y][x];
+              
+              if (cell.isWall) {
+                ctx.fillStyle = '#d4c4a8';
+              } else if (cell.exploredTime !== null) {
+                // Animate explored cells with a fade-in effect
+                const age = animationFrame - cell.exploredTime;
+                const alpha = Math.min(1, age / 20);
+                ctx.fillStyle = `rgba(169, 132, 103, ${alpha * 0.25})`;
+              } else {
+                ctx.fillStyle = '#f5ede1';
+              }
+              
+              ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+              
+              ctx.strokeStyle = '#e0d4c0';
+              ctx.lineWidth = 0.5;
+              ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+          }
+          
+          // Draw the final path with animation
+          if (finalPath.length > 1) {
+            const pathProgress = Math.min(finalPath.length, (animationFrame - finalPath[0].drawnAt) / 3);
+            
+            ctx.lineWidth = cellSize / 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Draw glow effect
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#c17a5c';
+            ctx.strokeStyle = '#c17a5c';
+            
+            ctx.beginPath();
+            ctx.moveTo(
+              finalPath[0].x * cellSize + cellSize / 2,
+              finalPath[0].y * cellSize + cellSize / 2
+            );
+            
+            for (let i = 1; i < pathProgress; i++) {
+              ctx.lineTo(
+                finalPath[i].x * cellSize + cellSize / 2,
+                finalPath[i].y * cellSize + cellSize / 2
+              );
+            }
+            
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+          }
+        }
+        
+        // Animated Dijkstra's algorithm
+        async function dijkstraAnimated(startX, startY, endX, endY) {
+          for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+              grid[y][x].distance = Infinity;
+              grid[y][x].previous = null;
+              grid[y][x].visited = false;
+              grid[y][x].inQueue = false;
+              grid[y][x].exploredTime = null;
+            }
+          }
+          
+          const pq = [];
+          const startCell = grid[startY][startX];
+          startCell.distance = 0;
+          startCell.inQueue = true;
+          pq.push(startCell);
+          
+          const directions = [
+            {x: 0, y: -1}, {x: 1, y: 0},
+            {x: 0, y: 1}, {x: -1, y: 0}
+          ];
+          
+          let stepCount = 0;
+          
+          while (pq.length > 0) {
+            let minIndex = 0;
+            for (let i = 1; i < pq.length; i++) {
+              if (pq[i].distance < pq[minIndex].distance) {
+                minIndex = i;
+              }
+            }
+            
+            const current = pq.splice(minIndex, 1)[0];
+            current.visited = true;
+            current.exploredTime = animationFrame;
+            exploredCells.push(current);
+            
+            // Slow down the animation - wait every few steps
+            stepCount++;
+            if (stepCount % 2 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 5));
+            }
+            
+            if (current.x === endX && current.y === endY) {
+              reconstructPath(grid[endY][endX]);
+              return;
+            }
+            
+            for (const dir of directions) {
+              const nx = current.x + dir.x;
+              const ny = current.y + dir.y;
+              
+              if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
+              
+              const neighbor = grid[ny][nx];
+              
+              if (neighbor.isWall) continue;
+              
+              const tentativeDistance = current.distance + 1;
+              
+              if (tentativeDistance < neighbor.distance) {
+                neighbor.distance = tentativeDistance;
+                neighbor.previous = current;
+                
+                if (!neighbor.inQueue) {
+                  neighbor.inQueue = true;
+                  pq.push(neighbor);
+                }
+              }
+            }
+          }
+        }
+        
+        function reconstructPath(endCell) {
+          let current = endCell;
+          const path = [];
+          
+          while (current !== null) {
+            path.unshift(current);
+            current = current.previous;
+          }
+          
+          finalPath = path.map((cell, index) => ({
+            ...cell,
+            drawnAt: animationFrame + index * 2
+          }));
+        }
+        
+        // Animation loop
+        function animate() {
+          animationFrame++;
+          drawMaze();
+          requestAnimationFrame(animate);
+        }
+        
+        // Start animation
+        animate();
+        
+        // Run Dijkstra's algorithm after initial render
+        setTimeout(() => {
+          const endX = (cols % 2 === 0) ? cols - 2 : cols - 1;
+          const endY = (rows % 2 === 0) ? rows - 2 : rows - 1;
+          dijkstraAnimated(1, 1, endX, endY);
+        }, 1000);
+      });
+    </script>
   </body>
 </html>
