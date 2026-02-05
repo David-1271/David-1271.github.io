@@ -1,0 +1,136 @@
+/* Styles for index page with maze background */
+body.index-page {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #faf8f3;
+  height: 100vh;
+  width: 100vw;
+}
+
+#maze-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+#maze-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.content-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.card {
+  background-color: rgba(255, 253, 248, 0.97);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(139, 115, 85, 0.15);
+  border-radius: 15px;
+  border: 2px solid #e8dcc4;
+  pointer-events: auto;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.nav-link {
+  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: #5a4a3a;
+}
+
+.nav-link:hover {
+  background-color: rgba(232, 220, 196, 0.4);
+  transform: translateX(5px);
+  color: #3a2a1a;
+}
+
+h1 {
+  color: #5a4a3a;
+  font-weight: 600;
+}
+
+/* Specific styles for content pages - simpler design */
+body.content-page {
+  background-color: #faf8f3;
+  color: #5a4a3a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  background-color: #f8f5ee;
+  border: 1px solid #e8dcc4;
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.navbar-brand-custom {
+  font-weight: 600;
+  color: #5a4a3a !important;
+}
+
+.navbar-nav .nav-link {
+  color: #5a4a3a !important;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: #f0e8da;
+  color: #3a2a1a !important;
+}
+
+.navbar-nav .nav-link.active {
+  background-color: #e8dcc4;
+  color: #3a2a1a !important;
+}
+
+.container-content {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: rgba(255, 253, 248, 0.9);
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  border: 1px solid #e8dcc4;
+}
+
+h1, h2, h3 {
+  color: #5a4a3a;
+}
+
+h1 {
+  font-weight: 600;
+  border-bottom: 2px solid #e8dcc4;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+h2, h3 {
+  color: #6b5b4d;
+}
+
+a {
+  color: #8b7355;
+}
+
+a:hover {
+  color: #5a4a3a;
+  text-decoration: underline;
+}
