@@ -52,7 +52,6 @@ body.index-page {
 
 .nav-link:hover {
   background-color: rgba(232, 220, 196, 0.4);
-  transform: translateX(5px);
   color: #3a2a1a;
 }
 
@@ -132,5 +131,4 @@ a {
 
 a:hover {
   color: #5a4a3a;
-  text-decoration: underline;
 }
