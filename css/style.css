@@ -101,7 +101,7 @@ body.content-page {
 }
 
 .container-content {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   background-color: rgba(255, 253, 248, 0.9);
   border-radius: 8px;
